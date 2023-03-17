@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Data.Models;
 using Microsoft.AspNetCore.Mvc;
-using Services;
 using Services.Dtos;
 using Services.ServicesAbstractions;
 
@@ -18,35 +19,27 @@ namespace ContactsApi.Controllers
         }
 
         [HttpPost]
-        public string Create([FromBody] Contact contact) 
+        public async Task Create([FromBody] Contact contact) 
         {
-            var resultado = _contactService.Create(contact);
-
-            return resultado;
+            await _contactService.Create(contact);
         }
 
-        [HttpGet("{senha}")]
-        public List<ContactResponseDto> Get([FromRoute] string senha)
+        [HttpGet]
+        public async Task<List<ContactResponseDto>> Get()
         {
-            var resultado = _contactService.GetAll(senha);
-
-            return resultado;
+            return await _contactService.GetAll();
         }
 
-        [HttpPut]
-        public string Update([FromBody] Contact updatedContact) 
+        [HttpPut("{id}")]
+        public async Task Update([FromRoute] int id, [FromBody] Contact updatedContact) 
         {
-            var resultado = _contactService.Update(updatedContact);
-
-            return resultado;
+            await _contactService.Update(id, updatedContact);
         }
 
-        [HttpDelete]
-        public string Delete([FromBody] Contact contact)
+        [HttpDelete("{id}")]
+        public async Task Delete([FromRoute] int id)
         {
-            var resultado = _contactService.Delete(contact);
-
-            return resultado;
+            await _contactService.Delete(id);
         }
     }
 }

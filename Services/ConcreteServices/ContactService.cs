@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Data.Models;
+using Data.RepositoriesAbstractions;
 using Services.Dtos;
 using Services.ServicesAbstractions;
 
@@ -6,85 +9,47 @@ namespace Services.ConcreteServices
 {
     public class ContactService : IContactService
     {
-        public string Create(Contact contato)
-        {
-            if (contato.Nome != "Jubiscleiton" && contato.Idade < 100)
-            {
-                var novoContato = new Contact() { Id = contato.Id, Nome = contato.Nome, Idade = contato.Idade };
+        private readonly IContactRepository _contactRepository;
 
-                return "Contato criado";
-            }
-            else
-            {
-                return "O Contato não foi criado!";
-            }
+        public ContactService(IContactRepository contactRepository)
+        {
+            _contactRepository = contactRepository;
         }
 
-        public List<ContactResponseDto> GetAll(string senha)
+        public async Task Create(Contact contato)
         {
-            var listaDeContatos = new List<Contact>()
-            {
-                new Contact() { Id = 1, Nome = "Professor Davy", Idade = 24, SenhaDoCartao = "123cba" },
-                new Contact() { Id = 2, Nome = "Tio Julio", Idade = 46, SenhaDoCartao = "321abc" }
-            };
-
-            if (senha == "123passatudo")
-            {
-                var listaDeDtosDeContatos = new List<ContactResponseDto>();
-
-                foreach (var contato in listaDeContatos)
-                {
-                    listaDeDtosDeContatos.Add(
-                        new ContactResponseDto()
-                        {
-                            Id = contato.Id,
-                            Nome = contato.Nome,
-                            Idade = contato.Idade
-                        }
-                    );
-                }
-
-                return listaDeDtosDeContatos;
-            }
-            else
-            {
-                return new List<ContactResponseDto>();
-            }
+            await _contactRepository.CreateAsync(contato);
         }
 
-        public string Update(Contact contato)
+        public async Task<List<ContactResponseDto>> GetAll()
         {
-            var contatoVazio = new Contact();
+            var listaDeContatos = await _contactRepository.GetAllAsync();
 
-            if (contato.Nome.Length > 0 && contato.Idade > 0)
-            {
-                contatoVazio.Id = contato.Id;
-                contatoVazio.Nome = contato.Nome;
-                contatoVazio.Idade = contato.Idade;
+            var listaDeDtosDeContatos = new List<ContactResponseDto>();
 
-                return "Contato atualizado";
-            }
-            else
+            foreach (var contato in listaDeContatos)
             {
-                return "O Contato não foi atualizado!";
+                listaDeDtosDeContatos.Add(
+                    new ContactResponseDto()
+                    {
+                        Id = contato.Id,
+                        Nome = contato.Nome,
+                        Idade = contato.Idade
+                    }
+                );
             }
+
+            return listaDeDtosDeContatos;
         }
 
-        public string Delete(Contact contato)
+        public async Task Update(int id, Contact contato)
         {
-            var contatoParaDeletar = new Contact() { Id = 1, Nome = "João deletado", Idade = 35 };
+           await _contactRepository.UpdateAsync(id, contato);
+        }
 
-            if (contato.Nome == contatoParaDeletar.Nome &&
-                contato.Idade == contatoParaDeletar.Idade)
-            {
-                contatoParaDeletar = null;
-
-                return "Contato apagado";
-            }
-            else
-            {
-                return "O Contato não foi apagado!";
-            }
+        public async Task Delete(int id)
+        {
+            await _contactRepository.DeleteAsync(id);
         }
     }
 }

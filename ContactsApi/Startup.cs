@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Data.ConcreteRepositories;
+using Data.DatabaseConnection;
+using Data.RepositoriesAbstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,7 +32,14 @@ namespace ContactsApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Configuração da conexão com o banco de dados
+            var connectionString = Configuration.GetConnectionString("DataBaseConnection");
+            services.AddSingleton<IDbConnection>(new SqlConnectionFactory(connectionString).CreateConnection());
+            
+            //Configuração de Injeção de Dependencia
+            services.AddScoped<IContactRepository, ContactRepository>();
             services.AddScoped<IContactService, ContactService>();
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
