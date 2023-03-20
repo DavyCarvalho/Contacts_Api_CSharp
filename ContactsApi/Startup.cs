@@ -1,19 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Data.ConcreteRepositories;
 using Data.DatabaseConnection;
 using Data.RepositoriesAbstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Services.ConcreteServices;
 using Services.ServicesAbstractions;
@@ -33,7 +27,8 @@ namespace ContactsApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuração da conexão com o banco de dados
-            var connectionString = Configuration.GetConnectionString("DataBaseConnection");
+            var connectionString = Configuration.GetValue<string>("DataBaseConnection");
+            
             services.AddSingleton<IDbConnection>(new SqlConnectionFactory(connectionString).CreateConnection());
             
             //Configuração de Injeção de Dependencia
