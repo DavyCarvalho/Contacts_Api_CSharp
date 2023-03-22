@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Data.Models;
 using Data.RepositoriesAbstractions;
+using Utils.Dtos;
 
 namespace Data.ConcreteRepositories
 {
@@ -17,7 +18,7 @@ namespace Data.ConcreteRepositories
             _dbConnection = dbConnection;
         }
 
-        public async Task CreateAsync(Contact contact)
+        public async Task CreateAsync(ContactRequestDto contact)
         {
             var query = @"
                 INSERT INTO Contact (Nome, Idade, CreatedAt)
@@ -48,7 +49,7 @@ namespace Data.ConcreteRepositories
             return await _dbConnection.QueryFirstOrDefaultAsync<Contact>(query, parameters);
         }
 
-        public async Task UpdateAsync(int id, Contact contact)
+        public async Task UpdateAsync(int id, ContactRequestDto contact)
         {
             var query = @"
                 UPDATE Contact

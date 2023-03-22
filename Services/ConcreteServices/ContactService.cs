@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Data.Models;
 using Data.RepositoriesAbstractions;
-using Services.Dtos;
 using Services.ServicesAbstractions;
+using Utils.Dtos;
 
 namespace Services.ConcreteServices
 {
@@ -16,7 +15,7 @@ namespace Services.ConcreteServices
             _contactRepository = contactRepository;
         }
 
-        public async Task Create(Contact contato)
+        public async Task Create(ContactRequestDto contato)
         {
             await _contactRepository.CreateAsync(contato);
         }
@@ -42,7 +41,7 @@ namespace Services.ConcreteServices
             return listaDeDtosDeContatos;
         }
 
-        public async Task Update(int id, Contact contato)
+        public async Task Update(int id, ContactRequestDto contato)
         {
            await _contactRepository.UpdateAsync(id, contato);
         }
