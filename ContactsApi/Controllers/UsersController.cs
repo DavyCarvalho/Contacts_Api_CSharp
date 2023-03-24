@@ -4,34 +4,34 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Services.ServicesAbstractions;
 using Utils.Api;
-using Utils.Dtos.Contact;
+using Utils.Dtos.User;
 
-namespace ContactsApi.Controllers
+namespace UsersApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ContactsController : ControllerBase
+    public class UsersController : ControllerBase
     {
-        private readonly IContactService _contactService;
+        private readonly IUserService _userService;
 
-        public ContactsController(IContactService contactService)
+        public UsersController(IUserService userService)
         {
-            _contactService = contactService;
+            _userService = userService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateContactRequestDto contact) 
+        public async Task<IActionResult> Create([FromBody] CreateUserRequestDto newUser)
         {
             try
             {
-                await _contactService.Create(contact);
+                await _userService.Create(newUser);
 
                 return Ok(new ApiResponse());
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApiResponse(ex.Message));
-            } 
+            }
         }
 
         [HttpGet]
@@ -39,9 +39,9 @@ namespace ContactsApi.Controllers
         {
             try
             {
-                var result =  await _contactService.GetAll();
+                var result = await _userService.GetAll();
 
-                return Ok(new ApiResponse<List<ContactResponseDto>>(result));
+                return Ok(new ApiResponse<List<UserResponseDto>>(result));
             }
             catch (Exception ex)
             {
@@ -50,11 +50,11 @@ namespace ContactsApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CreateContactRequestDto updatedContact)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateUserRequestDto updatedUser)
         {
             try
             {
-                await _contactService.Update(id, updatedContact);
+                await _userService.Update(id, updatedUser);
 
                 return Ok(new ApiResponse());
             }
@@ -69,7 +69,7 @@ namespace ContactsApi.Controllers
         {
             try
             {
-                await _contactService.Delete(id);
+                await _userService.Delete(id);
 
                 return Ok(new ApiResponse());
             }

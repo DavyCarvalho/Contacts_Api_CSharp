@@ -1,54 +1,93 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Data.Models;
 using Data.RepositoriesAbstractions;
 using Services.ServicesAbstractions;
 using Utils.Dtos;
+using Utils.Dtos.Contact;
 
 namespace Services.ConcreteServices
 {
     public class ContactService : IContactService
     {
         private readonly IContactRepository _contactRepository;
+        private readonly IUserRepository _userRepository;
 
-        public ContactService(IContactRepository contactRepository)
+        public ContactService(IContactRepository contactRepository, IUserRepository userRepository)
         {
             _contactRepository = contactRepository;
+            _userRepository = userRepository;
         }
 
-        public async Task Create(ContactRequestDto contato)
+        public async Task Create(CreateContactRequestDto createContactDto)
         {
-            await _contactRepository.CreateAsync(contato);
+            var existingUser = _userRepository.GetById(createContactDto.UserId);
+
+            if (existingUser != null)
+            {
+                var newContact = new Contact()
+                {
+                    Name = createContactDto.Name,
+                    Phone = createContactDto.Phone,
+                    UserId = createContactDto.UserId,
+                    CreatedAt = DateTime.Now
+                };
+
+                _contactRepository.Create(newContact);
+
+                await _contactRepository.SaveChangesAsync();
+            }
         }
 
         public async Task<List<ContactResponseDto>> GetAll()
         {
-            var listaDeContatos = await _contactRepository.GetAllAsync();
+            var contacts = await _contactRepository.GetAllAsync();
 
-            var listaDeDtosDeContatos = new List<ContactResponseDto>();
+            var contactDtos = new List<ContactResponseDto>();
 
-            foreach (var contato in listaDeContatos)
+            foreach (var contact in contacts)
             {
-                listaDeDtosDeContatos.Add(
+                contactDtos.Add(
                     new ContactResponseDto()
                     {
-                        Id = contato.Id,
-                        Nome = contato.Nome,
-                        Idade = contato.Idade
+                        Id = contact.Id,
+                        Name = contact.Name,
+                        Phone = contact.Phone,
+                        UserId = contact.UserId
                     }
                 );
             }
 
-            return listaDeDtosDeContatos;
+            return contactDtos;
         }
 
-        public async Task Update(int id, ContactRequestDto contato)
+        public async Task Update(int contactId, CreateContactRequestDto contato)
         {
-           await _contactRepository.UpdateAsync(id, contato);
+            var existingContact = _contactRepository.GetById(contactId);
+
+            if (existingContact != null)
+            {
+                existingContact.Name = contato.Name;
+                existingContact.Phone = contato.Phone; 
+                existingContact.UpdatedAt = DateTime.Now;
+
+                _contactRepository.Update(existingContact);
+
+                await _contactRepository.SaveChangesAsync();
+            }
         }
 
-        public async Task Delete(int id)
+        public async Task Delete(int contactId)
         {
-            await _contactRepository.DeleteAsync(id);
+            var existingContact = _contactRepository.GetById(contactId);
+
+            if (existingContact != null)
+            {
+                _contactRepository.Delete(existingContact);
+
+                await _contactRepository.SaveChangesAsync();
+            }
         }
     }
 }
