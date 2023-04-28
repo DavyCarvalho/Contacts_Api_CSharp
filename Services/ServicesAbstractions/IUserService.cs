@@ -9,6 +9,7 @@ namespace Services.ServicesAbstractions
         public Task Create(CreateUserRequestDto newUser);
         public Task<List<UserResponseDto>> GetAll();
         public Task Update(int userId, UpdateUserRequestDto updatedUser);
+        public Task UpdateToAdmin(int userId);
         public Task Delete(int id);
     }
 }

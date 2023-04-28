@@ -32,6 +32,12 @@ namespace Data.ConcreteRepositories
             return _context.Users.FirstOrDefault(c => c.Id == id);
         }
 
+        
+        public User GetByEmailAndPassword(string email, string password)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+        }
+
         public void Update(User updatedUser)
         {
             _context.Users.Update(updatedUser);

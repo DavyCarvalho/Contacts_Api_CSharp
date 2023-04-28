@@ -1,14 +1,17 @@
-using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text;
 using Data.ConcreteRepositories;
 using Data.DatabaseConnection;
 using Data.RepositoriesAbstractions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Services.ConcreteServices;
 using Services.ServicesAbstractions;
@@ -27,13 +30,15 @@ namespace ContactsApi
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetValue<string>("DataBaseConnection");
-            services.AddDbContext<ContactsDbContext>(options => 
-                options.UseSqlServer(connectionString).LogTo(Console.WriteLine, LogLevel.Information));
+            
+            services.AddDbContext<ContactsDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
             //Configuração de Injeção de Dependencia
             services.AddScoped<IContactRepository, ContactRepository>();
             services.AddScoped<IContactService, ContactService>();
-            
+            services.AddScoped<IAuthService, AuthService>();
+
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
 
@@ -41,6 +46,32 @@ namespace ContactsApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ContactsApi", Version = "v1" });
+            });
+
+            services.AddCors();
+
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            services.AddAuthorization(options => 
+            {
+                options.AddPolicy("Administrator", p => p.RequireClaim(ClaimTypes.Role, "admin"));
+                options.AddPolicy("Consumer", p => p.RequireClaim(ClaimTypes.Role, "consumer"));
             });
         }
 
@@ -57,6 +88,12 @@ namespace ContactsApi
 
             app.UseRouting();
 
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

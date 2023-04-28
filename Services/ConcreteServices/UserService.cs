@@ -25,6 +25,7 @@ namespace Services.ConcreteServices
                 Name = createUserDto.Name,
                 Email = createUserDto.Email,
                 Password = createUserDto.Password,
+                Role = "consumer",
                 CreatedAt = DateTime.Now
             };
 
@@ -33,7 +34,7 @@ namespace Services.ConcreteServices
             await _userRepository.SaveChangesAsync();
         }
 
-        public async Task<List<UserResponseDto>> GetAll()
+        public async Task<List<UserResponseDto>>  GetAll()
         {
             var users = await _userRepository.GetAllAsync();
 
@@ -63,6 +64,21 @@ namespace Services.ConcreteServices
             {
                 existingUser.Name = updatedUser.Name;
                 existingUser.Email = updatedUser.Email;
+                existingUser.UpdatedAt = DateTime.Now;
+
+                _userRepository.Update(existingUser);
+
+                await _userRepository.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateToAdmin(int userId)
+        {
+            var existingUser = _userRepository.GetById(userId);
+
+            if (existingUser != null) 
+            {
+                existingUser.Role = "admin";
                 existingUser.UpdatedAt = DateTime.Now;
 
                 _userRepository.Update(existingUser);

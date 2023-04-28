@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.ServicesAbstractions;
 using Utils.Api;
@@ -18,7 +19,7 @@ namespace UsersApi.Controllers
         {
             _userService = userService;
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserRequestDto newUser)
         {
@@ -34,6 +35,7 @@ namespace UsersApi.Controllers
             }
         }
 
+        [Authorize(Policy = "Administrator")]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -64,6 +66,23 @@ namespace UsersApi.Controllers
             }
         }
 
+        [Authorize(Policy = "Administrator")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateToAdmin([FromRoute] int id)
+        {
+            try
+            {
+                await _userService.UpdateToAdmin(id);
+
+                return Ok(new ApiResponse());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(ex.Message));
+            }
+        }
+
+        [Authorize(Policy = "Administrator")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {

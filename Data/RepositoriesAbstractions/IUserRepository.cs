@@ -9,6 +9,7 @@ namespace Data.RepositoriesAbstractions
         void Create(User newUser);
         Task<IEnumerable<User>> GetAllAsync();
         User GetById(int id);
+        User GetByEmailAndPassword(string email, string password);
         void Update(User updatedUser);
         void Delete(User user);
         Task SaveChangesAsync();
