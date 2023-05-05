@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Data.Models;
 using Data.RepositoriesAbstractions;
 using Services.ServicesAbstractions;
-using Utils.Dtos;
 using Utils.Dtos.Contact;
 
 namespace Services.ConcreteServices
